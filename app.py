@@ -1,12 +1,39 @@
+import os
+from dotenv import load_dotenv
+
 import streamlit as st
 from PIL import Image
 
-from get_response import get_response
+from get_response import get_response, start_chat_session
 
 # Streamlit app
 
 # Title
 st.set_page_config(page_title="Calorie Counter")
+
+# Function to get api key from user if not already set
+@st.dialog("Enter Your API Key")
+def get_api():
+    api_key = st.text_input("Google Gemini API Key", type="password", help="Your API key remains secure and is not saved.")
+    if st.button("Submit"):
+        if api_key:
+            st.session_state["GOOGLE_API_KEY"] = api_key
+            st.success("API key set successfully!")
+            st.rerun()
+        else:
+            st.error("API key cannot be empty.")
+    st.markdown("[Create your Gemini API Key](https://aistudio.google.com/apikey)", unsafe_allow_html=True)
+
+# Loading API Keys
+load_dotenv()
+
+# Check if the API key is set
+if "GOOGLE_API_KEY" not in st.session_state:
+    if "GOOGLE_API_KEY" not in os.environ:
+        get_api()
+    else:
+        st.session_state["GOOGLE_API_KEY"] = os.environ["GOOGLE_API_KEY"]
+    st.session_state["chat_session"] = start_chat_session()
 
 # Header
 st.title("Calorie Counter")
@@ -59,6 +86,6 @@ if submit_file or text:
         if input:
                 with st.spinner(text="Analyzing..."):
                     # Display assistant response in chat message container
-                    response = st.chat_message("assistant").write_stream(stream=get_response(input))
+                    response = st.chat_message("assistant").write_stream(stream=get_response(input, st.session_state["chat_session"]))
                     # Add assistant response to chat history
                     st.session_state.messages.append({"role": "assistant", "content": response})
