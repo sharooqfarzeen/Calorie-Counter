@@ -1,4 +1,4 @@
-## [Try the app on streamlit](https://calorie-macro-counter.streamlit.app/)
+## [Try the app on Streamlit](https://calorie-macro-counter.streamlit.app/)
 
 **OR**
 
